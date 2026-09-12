@@ -18,7 +18,7 @@
     <div class="bg-blue-800 text-white p-5 rounded-2xl shadow-lg flex flex-col md:flex-row justify-between items-center gap-4">
       <div>
         <h1 class="text-2xl font-bold tracking-tight">Programa del servicio del campo</h1>
-        <p class="text-blue-200 text-xs md:text-sm mt-1">Gestión Dinámica de Martes a Domingo</p>
+        <p class="text-blue-200 text-xs md:text-sm mt-1">Gestión Dinámica de Puntos de Encuentro</p>
       </div>
       <div class="flex gap-2 w-full md:w-auto">
         <button onclick="toggleCatalogos()" class="bg-blue-700 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl font-medium text-sm transition flex-1 md:flex-none flex items-center justify-center gap-2">
@@ -114,12 +114,11 @@
       </form>
     </div>
 
-    <!-- Tabla Semanal (Martes a Domingo) -->
+    <!-- Tabla Semanal Exportable -->
     <div class="bg-white p-5 rounded-2xl shadow-md border border-slate-200 overflow-x-auto">
-      <div id="tablaExportable" class="p-4 bg-white min-w-[950px]">
-        <div class="text-center mb-5 pb-3 border-b">
-          <h2 class="text-xl font-bold text-slate-800 uppercase tracking-wide">Programa del servicio del campo</h2>
-          <p class="text-xs text-slate-500 mt-1">Martes a Domingo</p>
+      <div id="tablaExportable" class="p-6 bg-white min-w-[1050px]">
+        <div class="text-center mb-6 pb-4 border-b">
+          <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 uppercase tracking-wide">Programa del servicio del campo</h2>
         </div>
         <div class="grid grid-cols-6 gap-3"></div>
       </div>
@@ -172,31 +171,31 @@
 
       diasSemana.forEach(dia => {
         const col = document.createElement('div');
-        col.className = 'border rounded-xl overflow-hidden bg-slate-50 flex flex-col justify-between';
+        col.className = 'border-2 border-slate-300 rounded-xl overflow-hidden bg-slate-50 flex flex-col justify-between shadow-sm';
         
         const puntosDelDia = programacion.filter(item => item.dia === dia);
 
         let tarjetasHTML = puntosDelDia.map((item) => `
-          <div class="bg-white p-3 rounded-lg shadow-sm border border-slate-200 text-xs space-y-1 relative">
-            <div class="font-bold text-blue-700 text-xs">${item.lugar}</div>
-            <div class="text-slate-600 font-medium">🕒 ${item.hora}</div>
-            <div class="text-slate-600">👤 ${item.encargado}</div>
-            <div class="text-slate-800 font-medium bg-blue-50 p-1.5 rounded text-[11px] mt-1">📋 ${item.actividad}</div>
-            <div class="flex gap-1 pt-1.5 no-export">
-              <button onclick="prepararEdicion(${item.id})" class="flex-1 bg-slate-100 hover:bg-blue-50 text-blue-600 font-bold py-1 rounded text-[10px]">✏️ Editar</button>
-              <button onclick="eliminarPunto(${item.id})" class="flex-1 bg-slate-100 hover:bg-red-50 text-red-600 font-bold py-1 rounded text-[10px]">🗑️ Borrar</button>
+          <div class="bg-white p-3.5 rounded-xl shadow border border-slate-200 text-sm space-y-1.5 relative">
+            <div class="font-extrabold text-blue-800 text-base leading-tight">${item.lugar}</div>
+            <div class="text-slate-700 font-bold text-sm">🕒 ${item.hora}</div>
+            <div class="text-slate-700 font-medium text-sm">👤 ${item.encargado}</div>
+            <div class="text-slate-900 font-semibold bg-blue-50 border border-blue-100 p-2 rounded-lg text-xs mt-1.5">📋 ${item.actividad}</div>
+            <div class="flex gap-1 pt-2 no-export">
+              <button onclick="prepararEdicion(${item.id})" class="flex-1 bg-slate-100 hover:bg-blue-50 text-blue-600 font-bold py-1 rounded text-[11px]">✏️ Editar</button>
+              <button onclick="eliminarPunto(${item.id})" class="flex-1 bg-slate-100 hover:bg-red-50 text-red-600 font-bold py-1 rounded text-[11px]">🗑️ Borrar</button>
             </div>
           </div>
         `).join('');
 
         if (puntosDelDia.length === 0) {
-          tarjetasHTML = `<div class="text-center text-slate-400 py-8 text-xs italic">Sin registros</div>`;
+          tarjetasHTML = `<div class="text-center text-slate-400 py-10 text-sm italic font-medium">Sin registros</div>`;
         }
 
         col.innerHTML = `
           <div>
-            <div class="bg-blue-800 text-white text-center font-bold py-2 uppercase tracking-wider text-xs">${dia}</div>
-            <div class="p-2 space-y-2 min-h-[260px]">${tarjetasHTML}</div>
+            <div class="bg-blue-800 text-white text-center font-extrabold py-2.5 uppercase tracking-wider text-sm md:text-base border-b border-blue-900">${dia}</div>
+            <div class="p-2.5 space-y-2.5 min-h-[280px]">${tarjetasHTML}</div>
           </div>
         `;
 
