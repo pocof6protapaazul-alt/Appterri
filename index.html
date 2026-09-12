@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Puntos de Encuentro</title>
+  <!-- Tailwind CSS para el diseño -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- html2canvas para exportar la tabla a imagen JPG -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 md:p-6 text-gray-800">
+
+  <div class="max-w-6xl mx-auto space-y-6">
+    
+    <!-- Encabezado -->
+    <div class="bg-blue-700 text-white p-6 rounded-xl shadow-md flex flex-col md:flex-row justify-between items-center gap-4">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold">Agenda Semanal de Puntos de Encuentro</h1>
+        <p class="text-blue-100 text-sm mt-1">Gestión de 40 Puntos Fijos (Martes a Domingo)</p>
+      </div>
+      <button onclick="exportarJPG()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg font-semibold shadow-lg transition flex items-center gap-2">
+        📷 Descargar Tabla en JPG
+      </button>
+    </div>
+
+    <!-- Formulario de Asignación -->
+    <div class="bg-white p-6 rounded-xl shadow-md">
+      <h2 class="text-lg font-bold text-gray-700 mb-4 pb-2 border-b">Programar Punto de Encuentro</h2>
+      <form id="formPunto" onsubmit="agregarPunto(event)" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        
+        <div>
+          <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Día</label>
+          <select id="dia" class="w-full border rounded-lg p-2 bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none" required>
+            <option value="Martes">Martes</option>
+            <option value="Miércoles">Miércoles</option>
+            <option value="Jueves">Jueves</option>
+            <option value="Viernes">Viernes</option>
+            <option value="Sábado">Sábado</option>
+            <option value="Domingo">Domingo</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Hora</label>
+          <input type="time" id="hora" class="w-full border rounded-lg p-2 bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none" required>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Punto Fijo (1 - 40)</label>
+          <select id="lugar" class="w-full border rounded-lg p-2 bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none" required></select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Encargado</label>
+          <select id="encargado" class="w-full border rounded-lg p-2 bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none" required></select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Trabajo / Actividad</label>
+          <select id="actividad" class="w-full border rounded-lg p-2 bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none" required></select>
+        </div>
+
+        <div class="flex items-end">
+          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow transition">
+            + Agregar
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- TABLA SEMANAL (Área exportable) -->
+    <div class="bg-white p-6 rounded-xl shadow-md overflow-x-auto">
+      <div id="tablaExportable" class="p-4 bg-white min-w-[900px]">
+        <h2 class="text-xl font-bold text-center text-gray-800 mb-4">CRONOGRAMA SEMANAL DE TRABAJO</h2>
+        <div class="grid grid-cols-6 gap-3">
+          <!-- Columnas de Días -->
+          <template id="templateDia">
+            <div class="border rounded-lg overflow-hidden bg-gray-50">
+              <div class="bg-blue-800 text-white text-center font-bold py-2 uppercase tracking-wider text-sm header-dia"></div>
+              <div class="p-2 space-y-2 lista-dia min-h-[300px]"></div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Listas base fija
+    const puntosFijos = Array.from({ length: 40 }, (_, i) => `Punto ${i + 1}`);
+    const encargadosFijos = ["Juan Pérez", "María Gómez", "Carlos Ruiz", "Ana López", "Pedro Hernández", "Sofía Torres"];
+    const actividadesFijas = ["Construcción", "Limpieza", "Pintura", "Logística", "Mantenimiento", "Supervisión", "Instalación"];
+
+    const diasSemana = ["Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+    let programacion = JSON.parse(localStorage.getItem('agendaPuntos')) || [];
+
+    // Llenar menús desplegables
+    function cargarDesplegables() {
+      const selectLugar = document.getElementById('lugar');
+      const selectEncargado = document.getElementById('encargado');
+      const selectActividad = document.getElementById('actividad');
+
+      selectLugar.innerHTML = puntosFijos.map(p => `<option value="${p}">${p}</option>`).join('');
+      selectEncargado.innerHTML = encargadosFijos.map(e => `<option value="${e}">${e}</option>`).join('');
+      selectActividad.innerHTML = actividadesFijas.map(a => `<option value="${a}">${a}</option>`).join('');
+    }
+
+    // Renderizar la tabla de 6 días
+    function renderizarTabla() {
+      const contenedor = document.querySelector('#tablaExportable .grid');
+      contenedor.innerHTML = '';
+
+      diasSemana.forEach(dia => {
+        const col = document.createElement('div');
+        col.className = 'border rounded-lg overflow-hidden bg-gray-50';
+        
+        const puntosDelDia = programacion.filter(item => item.dia === dia);
+
+        let tarjetasHTML = puntosDelDia.map((item, index) => `
+          <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200 relative group text-xs">
+            <div class="font-bold text-blue-700 text-sm mb-1">${item.lugar}</div>
+            <div class="text-gray-600">🕒 <strong>${item.hora}</strong></div>
+            <div class="text-gray-600">👤 ${item.encargado}</div>
+            <div class="text-gray-800 font-medium mt-1 bg-blue-50 p-1 rounded">📋 ${item.actividad}</div>
+            <button onclick="eliminarPunto(${item.id})" class="mt-2 w-full bg-red-100 hover:bg-red-200 text-red-600 font-bold py-1 rounded transition text-[10px]">
+              Eliminar
+            </button>
+          </div>
+        `).join('');
+
+        if (puntosDelDia.length === 0) {
+          tarjetasHTML = `<div class="text-center text-gray-400 py-6 text-xs italic">Sin actividades</div>`;
+        }
+
+        col.innerHTML = `
+          <div class="bg-blue-800 text-white text-center font-bold py-2 uppercase tracking-wider text-xs">${dia}</div>
+          <div class="p-2 space-y-2 min-h-[250px]">${tarjetasHTML}</div>
+        `;
+
+        contenedor.appendChild(col);
+      });
+    }
+
+    function agregarPunto(e) {
+      e.preventDefault();
+      const nuevo = {
+        id: Date.now(),
+        dia: document.getElementById('dia').value,
+        hora: document.getElementById('hora').value,
+        lugar: document.getElementById('lugar').value,
+        encargado: document.getElementById('encargado').value,
+        actividad: document.getElementById('actividad').value
+      };
+
+      programacion.push(nuevo);
+      localStorage.setItem('agendaPuntos', JSON.stringify(programacion));
+      renderizarTabla();
+    }
+
+    function eliminarPunto(id) {
+      programacion = programacion.filter(p => p.id !== id);
+      localStorage.setItem('agendaPuntos', JSON.stringify(programacion));
+      renderizarTabla();
+    }
+
+    function exportarJPG() {
+      const elemento = document.getElementById('tablaExportable');
+      html2canvas(elemento, { scale: 2 }).then(canvas => {
+        const enlace = document.createElement('a');
+        enlace.download = `Cronograma_Semanal_Puntos.jpg`;
+        enlace.href = canvas.toDataURL('image/jpeg', 0.9);
+        enlace.click();
+      });
+    }
+
+    // Inicializar
+    cargarDesplegables();
+    renderizarTabla();
+  </script>
+</body>
+</html>
