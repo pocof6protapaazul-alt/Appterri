@@ -3,35 +3,77 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestión de Puntos de Encuentro</title>
-  <!-- Tailwind CSS para el diseño -->
+  <title>Programa del servicio del campo</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- html2canvas para exportar la tabla a imagen JPG -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    .exporting .no-export { display: none !important; }
+  </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-4 md:p-6 text-gray-800">
+<body class="bg-slate-100 min-h-screen p-3 md:p-6 text-slate-800">
 
-  <div class="max-w-6xl mx-auto space-y-6">
+  <div class="max-w-7xl mx-auto space-y-6">
     
     <!-- Encabezado -->
-    <div class="bg-blue-700 text-white p-6 rounded-xl shadow-md flex flex-col md:flex-row justify-between items-center gap-4">
+    <div class="bg-blue-800 text-white p-5 rounded-2xl shadow-lg flex flex-col md:flex-row justify-between items-center gap-4">
       <div>
-        <h1 class="text-2xl md:text-3xl font-bold">Agenda Semanal de Puntos de Encuentro</h1>
-        <p class="text-blue-100 text-sm mt-1">Gestión de 40 Puntos Fijos (Martes a Domingo)</p>
+        <h1 class="text-2xl font-bold tracking-tight">Programa del servicio del campo</h1>
+        <p class="text-blue-200 text-xs md:text-sm mt-1">Gestión Dinámica de Martes a Domingo</p>
       </div>
-      <button onclick="exportarJPG()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg font-semibold shadow-lg transition flex items-center gap-2">
-        📷 Descargar Tabla en JPG
-      </button>
+      <div class="flex gap-2 w-full md:w-auto">
+        <button onclick="toggleCatalogos()" class="bg-blue-700 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl font-medium text-sm transition flex-1 md:flex-none flex items-center justify-center gap-2">
+          ⚙️ Administrar Menús (Base de Datos)
+        </button>
+        <button onclick="exportarJPG()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md transition flex-1 md:flex-none flex items-center justify-center gap-2">
+          📷 Descargar Tabla en JPG
+        </button>
+      </div>
     </div>
 
-    <!-- Formulario de Asignación -->
-    <div class="bg-white p-6 rounded-xl shadow-md">
-      <h2 class="text-lg font-bold text-gray-700 mb-4 pb-2 border-b">Programar Punto de Encuentro</h2>
-      <form id="formPunto" onsubmit="agregarPunto(event)" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        
+    <!-- Base de datos editable para los desplegables -->
+    <div id="panelCatalogos" class="hidden bg-white p-5 rounded-2xl shadow-md border border-slate-200 space-y-4">
+      <div class="flex justify-between items-center pb-2 border-b">
+        <h3 class="font-bold text-slate-700 text-base">🗄️ Base de Datos de Opciones para Menús</h3>
+        <p class="text-xs text-slate-500">Agrega o modifica los elementos separando cada uno con una nueva línea</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Puntos Fijos -->
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-slate-700 uppercase">📍 Lista de Puntos Fijos:</label>
+          <textarea id="txtPuntos" rows="8" class="w-full border rounded-xl p-3 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Punto 1&#10;Punto 2&#10;Punto 3..."></textarea>
+        </div>
+
+        <!-- Encargados -->
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-slate-700 uppercase">👤 Lista de Encargados:</label>
+          <textarea id="txtEncargados" rows="8" class="w-full border rounded-xl p-3 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Juan Pérez&#10;María Gómez..."></textarea>
+        </div>
+
+        <!-- Actividades -->
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-slate-700 uppercase">📋 Lista de Actividades / Trabajos:</label>
+          <textarea id="txtActividades" rows="8" class="w-full border rounded-xl p-3 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Construcción&#10;Limpieza&#10;Pintura..."></textarea>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="guardarCatalogos()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow">
+          💾 Guardar Base de Datos y Actualizar Menús
+        </button>
+      </div>
+    </div>
+
+    <!-- Formulario con Menús Desplegables -->
+    <div class="bg-white p-5 rounded-2xl shadow-md border border-slate-200">
+      <h2 id="tituloForm" class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Asignar Punto de Encuentro</h2>
+      
+      <form id="formPunto" onsubmit="guardarPunto(event)" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <input type="hidden" id="editId" value="">
+
         <div>
-          <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Día</label>
-          <select id="dia" class="w-full border rounded-lg p-2 bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none" required>
+          <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Día</label>
+          <select id="dia" class="w-full border rounded-xl p-2.5 text-xs bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none" required>
             <option value="Martes">Martes</option>
             <option value="Miércoles">Miércoles</option>
             <option value="Jueves">Jueves</option>
@@ -42,111 +84,130 @@
         </div>
 
         <div>
-          <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Hora</label>
-          <input type="time" id="hora" class="w-full border rounded-lg p-2 bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none" required>
+          <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Hora</label>
+          <input type="time" id="hora" class="w-full border rounded-xl p-2.5 text-xs bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none" required>
         </div>
 
         <div>
-          <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Punto Fijo (1 - 40)</label>
-          <select id="lugar" class="w-full border rounded-lg p-2 bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none" required></select>
+          <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Seleccionar Punto</label>
+          <select id="lugar" class="w-full border rounded-xl p-2.5 text-xs bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none" required></select>
         </div>
 
         <div>
-          <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Encargado</label>
-          <select id="encargado" class="w-full border rounded-lg p-2 bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none" required></select>
+          <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Seleccionar Encargado</label>
+          <select id="encargado" class="w-full border rounded-xl p-2.5 text-xs bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none" required></select>
         </div>
 
         <div>
-          <label class="block text-xs font-bold uppercase text-gray-500 mb-1">Trabajo / Actividad</label>
-          <select id="actividad" class="w-full border rounded-lg p-2 bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none" required></select>
+          <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Seleccionar Trabajo</label>
+          <select id="actividad" class="w-full border rounded-xl p-2.5 text-xs bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none" required></select>
         </div>
 
-        <div class="flex items-end">
-          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow transition">
-            + Agregar
+        <div class="flex items-end gap-1">
+          <button type="submit" id="btnGuardar" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs shadow transition">
+            + Asignar Punto
+          </button>
+          <button type="button" id="btnCancelarEdit" onclick="cancelarEdicion()" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 px-3 rounded-xl text-xs transition">
+            ✕
           </button>
         </div>
       </form>
     </div>
 
-    <!-- TABLA SEMANAL (Área exportable) -->
-    <div class="bg-white p-6 rounded-xl shadow-md overflow-x-auto">
-      <div id="tablaExportable" class="p-4 bg-white min-w-[900px]">
-        <h2 class="text-xl font-bold text-center text-gray-800 mb-4">CRONOGRAMA SEMANAL DE TRABAJO</h2>
-        <div class="grid grid-cols-6 gap-3">
-          <!-- Columnas de Días -->
-          <template id="templateDia">
-            <div class="border rounded-lg overflow-hidden bg-gray-50">
-              <div class="bg-blue-800 text-white text-center font-bold py-2 uppercase tracking-wider text-sm header-dia"></div>
-              <div class="p-2 space-y-2 lista-dia min-h-[300px]"></div>
-            </div>
-          </template>
+    <!-- Tabla Semanal (Martes a Domingo) -->
+    <div class="bg-white p-5 rounded-2xl shadow-md border border-slate-200 overflow-x-auto">
+      <div id="tablaExportable" class="p-4 bg-white min-w-[950px]">
+        <div class="text-center mb-5 pb-3 border-b">
+          <h2 class="text-xl font-bold text-slate-800 uppercase tracking-wide">Programa del servicio del campo</h2>
+          <p class="text-xs text-slate-500 mt-1">Martes a Domingo</p>
         </div>
+        <div class="grid grid-cols-6 gap-3"></div>
       </div>
     </div>
 
   </div>
 
   <script>
-    // Listas base fija
-    const puntosFijos = Array.from({ length: 40 }, (_, i) => `Punto ${i + 1}`);
-    const encargadosFijos = ["Juan Pérez", "María Gómez", "Carlos Ruiz", "Ana López", "Pedro Hernández", "Sofía Torres"];
-    const actividadesFijas = ["Construcción", "Limpieza", "Pintura", "Logística", "Mantenimiento", "Supervisión", "Instalación"];
-
     const diasSemana = ["Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+    
+    // Carga de la base de datos de los menús
+    let puntosFijos = JSON.parse(localStorage.getItem('bd_puntos')) || Array.from({ length: 40 }, (_, i) => `Punto ${i + 1}`);
+    let encargadosFijos = JSON.parse(localStorage.getItem('bd_encargados')) || ["Juan Pérez", "María Gómez", "Carlos Ruiz", "Ana López", "Pedro Hernández"];
+    let actividadesFijas = JSON.parse(localStorage.getItem('bd_actividades')) || ["Construcción", "Limpieza", "Pintura", "Logística", "Mantenimiento", "Supervisión"];
+    
     let programacion = JSON.parse(localStorage.getItem('agendaPuntos')) || [];
 
-    // Llenar menús desplegables
-    function cargarDesplegables() {
-      const selectLugar = document.getElementById('lugar');
-      const selectEncargado = document.getElementById('encargado');
-      const selectActividad = document.getElementById('actividad');
-
-      selectLugar.innerHTML = puntosFijos.map(p => `<option value="${p}">${p}</option>`).join('');
-      selectEncargado.innerHTML = encargadosFijos.map(e => `<option value="${e}">${e}</option>`).join('');
-      selectActividad.innerHTML = actividadesFijas.map(a => `<option value="${a}">${a}</option>`).join('');
+    function toggleCatalogos() {
+      const p = document.getElementById('panelCatalogos');
+      p.classList.toggle('hidden');
+      if (!p.classList.contains('hidden')) {
+        document.getElementById('txtPuntos').value = puntosFijos.join('\n');
+        document.getElementById('txtEncargados').value = encargadosFijos.join('\n');
+        document.getElementById('txtActividades').value = actividadesFijas.join('\n');
+      }
     }
 
-    // Renderizar la tabla de 6 días
+    function guardarCatalogos() {
+      puntosFijos = document.getElementById('txtPuntos').value.split('\n').map(s => s.trim()).filter(Boolean);
+      encargadosFijos = document.getElementById('txtEncargados').value.split('\n').map(s => s.trim()).filter(Boolean);
+      actividadesFijas = document.getElementById('txtActividades').value.split('\n').map(s => s.trim()).filter(Boolean);
+
+      localStorage.setItem('bd_puntos', JSON.stringify(puntosFijos));
+      localStorage.setItem('bd_encargados', JSON.stringify(encargadosFijos));
+      localStorage.setItem('bd_actividades', JSON.stringify(actividadesFijas));
+
+      cargarDesplegables();
+      toggleCatalogos();
+    }
+
+    function cargarDesplegables() {
+      document.getElementById('lugar').innerHTML = puntosFijos.map(p => `<option value="${p}">${p}</option>`).join('');
+      document.getElementById('encargado').innerHTML = encargadosFijos.map(e => `<option value="${e}">${e}</option>`).join('');
+      document.getElementById('actividad').innerHTML = actividadesFijas.map(a => `<option value="${a}">${a}</option>`).join('');
+    }
+
     function renderizarTabla() {
       const contenedor = document.querySelector('#tablaExportable .grid');
       contenedor.innerHTML = '';
 
       diasSemana.forEach(dia => {
         const col = document.createElement('div');
-        col.className = 'border rounded-lg overflow-hidden bg-gray-50';
+        col.className = 'border rounded-xl overflow-hidden bg-slate-50 flex flex-col justify-between';
         
         const puntosDelDia = programacion.filter(item => item.dia === dia);
 
-        let tarjetasHTML = puntosDelDia.map((item, index) => `
-          <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200 relative group text-xs">
-            <div class="font-bold text-blue-700 text-sm mb-1">${item.lugar}</div>
-            <div class="text-gray-600">🕒 <strong>${item.hora}</strong></div>
-            <div class="text-gray-600">👤 ${item.encargado}</div>
-            <div class="text-gray-800 font-medium mt-1 bg-blue-50 p-1 rounded">📋 ${item.actividad}</div>
-            <button onclick="eliminarPunto(${item.id})" class="mt-2 w-full bg-red-100 hover:bg-red-200 text-red-600 font-bold py-1 rounded transition text-[10px]">
-              Eliminar
-            </button>
+        let tarjetasHTML = puntosDelDia.map((item) => `
+          <div class="bg-white p-3 rounded-lg shadow-sm border border-slate-200 text-xs space-y-1 relative">
+            <div class="font-bold text-blue-700 text-xs">${item.lugar}</div>
+            <div class="text-slate-600 font-medium">🕒 ${item.hora}</div>
+            <div class="text-slate-600">👤 ${item.encargado}</div>
+            <div class="text-slate-800 font-medium bg-blue-50 p-1.5 rounded text-[11px] mt-1">📋 ${item.actividad}</div>
+            <div class="flex gap-1 pt-1.5 no-export">
+              <button onclick="prepararEdicion(${item.id})" class="flex-1 bg-slate-100 hover:bg-blue-50 text-blue-600 font-bold py-1 rounded text-[10px]">✏️ Editar</button>
+              <button onclick="eliminarPunto(${item.id})" class="flex-1 bg-slate-100 hover:bg-red-50 text-red-600 font-bold py-1 rounded text-[10px]">🗑️ Borrar</button>
+            </div>
           </div>
         `).join('');
 
         if (puntosDelDia.length === 0) {
-          tarjetasHTML = `<div class="text-center text-gray-400 py-6 text-xs italic">Sin actividades</div>`;
+          tarjetasHTML = `<div class="text-center text-slate-400 py-8 text-xs italic">Sin registros</div>`;
         }
 
         col.innerHTML = `
-          <div class="bg-blue-800 text-white text-center font-bold py-2 uppercase tracking-wider text-xs">${dia}</div>
-          <div class="p-2 space-y-2 min-h-[250px]">${tarjetasHTML}</div>
+          <div>
+            <div class="bg-blue-800 text-white text-center font-bold py-2 uppercase tracking-wider text-xs">${dia}</div>
+            <div class="p-2 space-y-2 min-h-[260px]">${tarjetasHTML}</div>
+          </div>
         `;
 
         contenedor.appendChild(col);
       });
     }
 
-    function agregarPunto(e) {
+    function guardarPunto(e) {
       e.preventDefault();
-      const nuevo = {
-        id: Date.now(),
+      const editId = document.getElementById('editId').value;
+      const datos = {
         dia: document.getElementById('dia').value,
         hora: document.getElementById('hora').value,
         lugar: document.getElementById('lugar').value,
@@ -154,9 +215,39 @@
         actividad: document.getElementById('actividad').value
       };
 
-      programacion.push(nuevo);
+      if (editId) {
+        programacion = programacion.map(p => p.id == editId ? { ...datos, id: Number(editId) } : p);
+      } else {
+        programacion.push({ ...datos, id: Date.now() });
+      }
+
       localStorage.setItem('agendaPuntos', JSON.stringify(programacion));
+      cancelarEdicion();
       renderizarTabla();
+    }
+
+    function prepararEdicion(id) {
+      const item = programacion.find(p => p.id === id);
+      if (!item) return;
+
+      document.getElementById('editId').value = item.id;
+      document.getElementById('dia').value = item.dia;
+      document.getElementById('hora').value = item.hora;
+      document.getElementById('lugar').value = item.lugar;
+      document.getElementById('encargado').value = item.encargado;
+      document.getElementById('actividad').value = item.actividad;
+
+      document.getElementById('tituloForm').innerText = 'Editar Registro Seleccionado';
+      document.getElementById('btnGuardar').innerText = '✓ Guardar Cambios';
+      document.getElementById('btnCancelarEdit').classList.remove('hidden');
+    }
+
+    function cancelarEdicion() {
+      document.getElementById('editId').value = '';
+      document.getElementById('formPunto').reset();
+      document.getElementById('tituloForm').innerText = 'Asignar Punto de Encuentro';
+      document.getElementById('btnGuardar').innerText = '+ Asignar Punto';
+      document.getElementById('btnCancelarEdit').classList.add('hidden');
     }
 
     function eliminarPunto(id) {
@@ -166,16 +257,18 @@
     }
 
     function exportarJPG() {
-      const elemento = document.getElementById('tablaExportable');
-      html2canvas(elemento, { scale: 2 }).then(canvas => {
+      const contenedor = document.getElementById('tablaExportable');
+      contenedor.classList.add('exporting');
+
+      html2canvas(contenedor, { scale: 2 }).then(canvas => {
         const enlace = document.createElement('a');
-        enlace.download = `Cronograma_Semanal_Puntos.jpg`;
-        enlace.href = canvas.toDataURL('image/jpeg', 0.9);
+        enlace.download = `Programa_del_servicio_del_campo.jpg`;
+        enlace.href = canvas.toDataURL('image/jpeg', 0.95);
         enlace.click();
+        contenedor.classList.remove('exporting');
       });
     }
 
-    // Inicializar
     cargarDesplegables();
     renderizarTabla();
   </script>
