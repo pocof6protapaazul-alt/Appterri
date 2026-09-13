@@ -64,11 +64,11 @@
       </div>
     </div>
 
-    <!-- Formulario con Menús Desplegables y Fecha -->
+    <!-- Formulario con Menús Desplegables, Fecha y Jornada -->
     <div class="bg-white p-5 rounded-2xl shadow-md border border-slate-200">
       <h2 id="tituloForm" class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Asignar Punto de Encuentro</h2>
       
-      <form id="formPunto" onsubmit="guardarPunto(event)" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-3">
+      <form id="formPunto" onsubmit="guardarPunto(event)" class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-8 gap-3">
         <input type="hidden" id="editId" value="">
 
         <div>
@@ -87,6 +87,14 @@
         <div>
           <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Fecha</label>
           <input type="date" id="fecha" class="w-full border rounded-xl p-2.5 text-xs bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Jornada</label>
+          <select id="jornada" class="w-full border rounded-xl p-2.5 text-xs bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none" required>
+            <option value="Mañana">Mañana</option>
+            <option value="Tarde">Tarde</option>
+          </select>
         </div>
 
         <div>
@@ -189,7 +197,7 @@
       const sufijo = horas >= 12 ? 'pm' : 'am';
 
       horas = horas % 12;
-      horas = horas ? horas : 12; // La hora '0' se convierte en '12'
+      horas = horas ? horas : 12;
       const horasStr = horas < 10 ? '0' + horas : horas;
 
       return `${horasStr}:${minutos} ${sufijo}`;
@@ -211,7 +219,12 @@
 
         let tarjetasHTML = puntosDelDia.map((item) => `
           <div class="bg-white p-3.5 rounded-xl shadow border border-slate-200 text-sm space-y-1.5 relative">
-            <div class="font-extrabold text-blue-800 text-base leading-tight">${item.lugar}</div>
+            <div class="flex justify-between items-start gap-1">
+              <div class="font-extrabold text-blue-800 text-base leading-tight">${item.lugar}</div>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${item.jornada === 'Mañana' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-indigo-100 text-indigo-800 border border-indigo-200'}">
+                ${item.jornada || 'Mañana'}
+              </span>
+            </div>
             ${item.fecha ? `<div class="text-blue-600 font-bold text-xs">📅 ${formatearFecha(item.fecha)}</div>` : ''}
             <div class="text-slate-700 font-bold text-sm">🕒 ${formatearHora12h(item.hora)}</div>
             <div class="text-slate-700 font-medium text-sm">👤 ${item.encargado}</div>
@@ -247,6 +260,7 @@
       const datos = {
         dia: document.getElementById('dia').value,
         fecha: document.getElementById('fecha').value,
+        jornada: document.getElementById('jornada').value,
         hora: document.getElementById('hora').value,
         lugar: document.getElementById('lugar').value,
         encargado: document.getElementById('encargado').value,
@@ -271,6 +285,7 @@
       document.getElementById('editId').value = item.id;
       document.getElementById('dia').value = item.dia;
       document.getElementById('fecha').value = item.fecha || '';
+      document.getElementById('jornada').value = item.jornada || 'Mañana';
       document.getElementById('hora').value = item.hora;
       document.getElementById('lugar').value = item.lugar;
       document.getElementById('encargado').value = item.encargado;
