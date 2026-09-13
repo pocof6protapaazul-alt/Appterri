@@ -130,7 +130,7 @@
 
     <!-- Tabla Semanal Exportable (Lunes a Domingo) -->
     <div class="bg-white p-5 rounded-2xl shadow-md border border-slate-200 overflow-x-auto">
-      <div id="tablaExportable" class="p-6 bg-white min-w-[1200px]">
+      <div id="tablaExportable" class="p-6 bg-white min-w-[1300px]">
         <div class="text-center mb-6 pb-4 border-b">
           <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 uppercase tracking-wide">Programa del servicio del campo</h2>
         </div>
@@ -218,26 +218,42 @@
         const fechaEncabezado = primerConFecha ? formatearFecha(primerConFecha.fecha) : '';
 
         let tarjetasHTML = puntosDelDia.map((item) => `
-          <div class="bg-white p-3.5 rounded-xl shadow border border-slate-200 text-sm space-y-1.5 relative">
-            <div class="flex justify-between items-start gap-1">
-              <div class="font-extrabold text-blue-800 text-base leading-tight">${item.lugar}</div>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${item.jornada === 'Mañana' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-indigo-100 text-indigo-800 border border-indigo-200'}">
+          <div class="bg-white p-3 rounded-xl shadow border border-slate-200 text-xs space-y-1.5">
+            <!-- Punto de Encuentro destacado en ancho completo -->
+            <div class="font-black text-blue-900 text-sm md:text-base leading-snug border-b pb-1">
+              📍 ${item.lugar}
+            </div>
+
+            <!-- Fila con Jornada, Hora y Fecha -->
+            <div class="flex flex-wrap justify-between items-center text-[11px] text-slate-700 gap-1 pt-0.5">
+              <span class="font-bold px-1.5 py-0.5 rounded ${item.jornada === 'Mañana' ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800'}">
                 ${item.jornada || 'Mañana'}
               </span>
+              <span class="font-bold text-slate-800">🕒 ${formatearHora12h(item.hora)}</span>
             </div>
-            ${item.fecha ? `<div class="text-blue-600 font-bold text-xs">📅 ${formatearFecha(item.fecha)}</div>` : ''}
-            <div class="text-slate-700 font-bold text-sm">🕒 ${formatearHora12h(item.hora)}</div>
-            <div class="text-slate-700 font-medium text-sm">👤 ${item.encargado}</div>
-            <div class="text-slate-900 font-semibold bg-blue-50 border border-blue-100 p-2 rounded-lg text-xs mt-1.5">📋 ${item.actividad}</div>
-            <div class="flex gap-1 pt-2 no-export">
-              <button onclick="prepararEdicion(${item.id})" class="flex-1 bg-slate-100 hover:bg-blue-50 text-blue-600 font-bold py-1 rounded text-[11px]">✏️ Editar</button>
-              <button onclick="eliminarPunto(${item.id})" class="flex-1 bg-slate-100 hover:bg-red-50 text-red-600 font-bold py-1 rounded text-[11px]">🗑️ Borrar</button>
+
+            ${item.fecha ? `<div class="text-blue-600 font-semibold text-[10px]">📅 ${formatearFecha(item.fecha)}</div>` : ''}
+
+            <!-- Encargado -->
+            <div class="text-slate-700 font-medium text-xs pt-0.5">
+              👤 <span class="font-semibold text-slate-800">${item.encargado}</span>
+            </div>
+
+            <!-- Trabajo / Actividad -->
+            <div class="text-slate-900 font-semibold bg-blue-50 border border-blue-100 p-1.5 rounded-lg text-xs">
+              📋 ${item.actividad}
+            </div>
+
+            <!-- Botones de Acción (no se exportan a JPG) -->
+            <div class="flex gap-1 pt-1.5 no-export">
+              <button onclick="prepararEdicion(${item.id})" class="flex-1 bg-slate-100 hover:bg-blue-50 text-blue-600 font-bold py-1 rounded text-[10px]">✏️ Editar</button>
+              <button onclick="eliminarPunto(${item.id})" class="flex-1 bg-slate-100 hover:bg-red-50 text-red-600 font-bold py-1 rounded text-[10px]">🗑️ Borrar</button>
             </div>
           </div>
         `).join('');
 
         if (puntosDelDia.length === 0) {
-          tarjetasHTML = `<div class="text-center text-slate-400 py-10 text-sm italic font-medium">Sin registros</div>`;
+          tarjetasHTML = `<div class="text-center text-slate-400 py-10 text-xs italic font-medium">Sin registros</div>`;
         }
 
         col.innerHTML = `
@@ -246,7 +262,7 @@
               <div class="font-extrabold text-sm md:text-base">${dia}</div>
               ${fechaEncabezado ? `<div class="text-[11px] text-blue-200 font-normal mt-0.5">${fechaEncabezado}</div>` : ''}
             </div>
-            <div class="p-2.5 space-y-2.5 min-h-[280px]">${tarjetasHTML}</div>
+            <div class="p-2 space-y-2 min-h-[280px]">${tarjetasHTML}</div>
           </div>
         `;
 
