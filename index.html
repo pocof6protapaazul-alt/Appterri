@@ -52,7 +52,7 @@
 
         <!-- Actividades -->
         <div class="space-y-2">
-          <label class="block text-xs font-bold text-slate-700 uppercase">📋 Lista de Actividades / Trabajos:</label>
+          <label class="block text-xs font-bold text-slate-700 uppercase">📌 Lista de Actividades / Trabajos:</label>
           <textarea id="txtActividades" rows="8" class="w-full border rounded-xl p-3 text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Construcción&#10;Limpieza&#10;Pintura..."></textarea>
         </div>
       </div>
@@ -218,7 +218,6 @@
         const fechaEncabezado = primerConFecha ? formatearFecha(primerConFecha.fecha) : '';
 
         let tarjetasHTML = puntosDelDia.map((item, index) => {
-          // Fondo claro para la primera actividad (index 0) y fondo más oscuro para la segunda (index 1), etc.
           const esFondoOscuro = index % 2 !== 0;
           const bgTarjeta = esFondoOscuro ? 'bg-slate-200 border-slate-300' : 'bg-white border-slate-200';
           const bgCajaTrabajo = esFondoOscuro ? 'bg-blue-100/80 border-blue-200' : 'bg-blue-50 border-blue-100';
@@ -245,7 +244,7 @@
 
               <!-- Trabajo / Actividad -->
               <div class="text-slate-900 font-semibold ${bgCajaTrabajo} border p-1.5 rounded-lg text-xs">
-                📋 ${item.actividad}
+                📌 ${item.actividad}
               </div>
 
               <!-- Botones de Acción (no se exportan a JPG) -->
