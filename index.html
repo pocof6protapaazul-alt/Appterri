@@ -18,7 +18,7 @@
     <div class="bg-blue-800 text-white p-5 rounded-2xl shadow-lg flex flex-col md:flex-row justify-between items-center gap-4">
       <div>
         <h1 class="text-2xl font-bold tracking-tight">Programa del servicio del campo</h1>
-        <p class="text-blue-200 text-xs md:text-sm mt-1">Gestión Dinámica de Puntos de Encuentro</p>
+        <p class="text-blue-200 text-xs md:text-sm mt-1">Gestión Dinámica de Puntos de Encuentro (Lunes a Domingo)</p>
       </div>
       <div class="flex gap-2 w-full md:w-auto">
         <button onclick="toggleCatalogos()" class="bg-blue-700 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl font-medium text-sm transition flex-1 md:flex-none flex items-center justify-center gap-2">
@@ -64,16 +64,17 @@
       </div>
     </div>
 
-    <!-- Formulario con Menús Desplegables -->
+    <!-- Formulario con Menús Desplegables y Fecha -->
     <div class="bg-white p-5 rounded-2xl shadow-md border border-slate-200">
       <h2 id="tituloForm" class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Asignar Punto de Encuentro</h2>
       
-      <form id="formPunto" onsubmit="guardarPunto(event)" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <form id="formPunto" onsubmit="guardarPunto(event)" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-3">
         <input type="hidden" id="editId" value="">
 
         <div>
           <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Día</label>
           <select id="dia" class="w-full border rounded-xl p-2.5 text-xs bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none" required>
+            <option value="Lunes">Lunes</option>
             <option value="Martes">Martes</option>
             <option value="Miércoles">Miércoles</option>
             <option value="Jueves">Jueves</option>
@@ -81,6 +82,11 @@
             <option value="Sábado">Sábado</option>
             <option value="Domingo">Domingo</option>
           </select>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Fecha</label>
+          <input type="date" id="fecha" class="w-full border rounded-xl p-2.5 text-xs bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
 
         <div>
@@ -114,20 +120,20 @@
       </form>
     </div>
 
-    <!-- Tabla Semanal Exportable -->
+    <!-- Tabla Semanal Exportable (Lunes a Domingo) -->
     <div class="bg-white p-5 rounded-2xl shadow-md border border-slate-200 overflow-x-auto">
-      <div id="tablaExportable" class="p-6 bg-white min-w-[1050px]">
+      <div id="tablaExportable" class="p-6 bg-white min-w-[1200px]">
         <div class="text-center mb-6 pb-4 border-b">
           <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 uppercase tracking-wide">Programa del servicio del campo</h2>
         </div>
-        <div class="grid grid-cols-6 gap-3"></div>
+        <div class="grid grid-cols-7 gap-3"></div>
       </div>
     </div>
 
   </div>
 
   <script>
-    const diasSemana = ["Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+    const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
     
     // Carga de la base de datos de los menús
     let puntosFijos = JSON.parse(localStorage.getItem('bd_puntos')) || Array.from({ length: 40 }, (_, i) => `Punto ${i + 1}`);
@@ -165,6 +171,15 @@
       document.getElementById('actividad').innerHTML = actividadesFijas.map(a => `<option value="${a}">${a}</option>`).join('');
     }
 
+    function formatearFecha(fechaStr) {
+      if (!fechaStr) return '';
+      const partes = fechaStr.split('-');
+      if (partes.length === 3) {
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+      }
+      return fechaStr;
+    }
+
     function renderizarTabla() {
       const contenedor = document.querySelector('#tablaExportable .grid');
       contenedor.innerHTML = '';
@@ -175,9 +190,14 @@
         
         const puntosDelDia = programacion.filter(item => item.dia === dia);
 
+        // Obtener la fecha asignada al día si existe
+        const primerConFecha = puntosDelDia.find(item => item.fecha);
+        const fechaEncabezado = primerConFecha ? formatearFecha(primerConFecha.fecha) : '';
+
         let tarjetasHTML = puntosDelDia.map((item) => `
           <div class="bg-white p-3.5 rounded-xl shadow border border-slate-200 text-sm space-y-1.5 relative">
             <div class="font-extrabold text-blue-800 text-base leading-tight">${item.lugar}</div>
+            ${item.fecha ? `<div class="text-blue-600 font-bold text-xs">📅 ${formatearFecha(item.fecha)}</div>` : ''}
             <div class="text-slate-700 font-bold text-sm">🕒 ${item.hora}</div>
             <div class="text-slate-700 font-medium text-sm">👤 ${item.encargado}</div>
             <div class="text-slate-900 font-semibold bg-blue-50 border border-blue-100 p-2 rounded-lg text-xs mt-1.5">📋 ${item.actividad}</div>
@@ -194,7 +214,10 @@
 
         col.innerHTML = `
           <div>
-            <div class="bg-blue-800 text-white text-center font-extrabold py-2.5 uppercase tracking-wider text-sm md:text-base border-b border-blue-900">${dia}</div>
+            <div class="bg-blue-800 text-white text-center py-2.5 uppercase tracking-wider border-b border-blue-900">
+              <div class="font-extrabold text-sm md:text-base">${dia}</div>
+              ${fechaEncabezado ? `<div class="text-[11px] text-blue-200 font-normal mt-0.5">${fechaEncabezado}</div>` : ''}
+            </div>
             <div class="p-2.5 space-y-2.5 min-h-[280px]">${tarjetasHTML}</div>
           </div>
         `;
@@ -208,6 +231,7 @@
       const editId = document.getElementById('editId').value;
       const datos = {
         dia: document.getElementById('dia').value,
+        fecha: document.getElementById('fecha').value,
         hora: document.getElementById('hora').value,
         lugar: document.getElementById('lugar').value,
         encargado: document.getElementById('encargado').value,
@@ -231,6 +255,7 @@
 
       document.getElementById('editId').value = item.id;
       document.getElementById('dia').value = item.dia;
+      document.getElementById('fecha').value = item.fecha || '';
       document.getElementById('hora').value = item.hora;
       document.getElementById('lugar').value = item.lugar;
       document.getElementById('encargado').value = item.encargado;
