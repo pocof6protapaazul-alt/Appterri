@@ -180,6 +180,21 @@
       return fechaStr;
     }
 
+    // Función para convertir formato 24h a 12h con am/pm
+    function formatearHora12h(hora24) {
+      if (!hora24) return '';
+      const [h, m] = hora24.split(':');
+      let horas = parseInt(h, 10);
+      const minutos = m || '00';
+      const sufijo = horas >= 12 ? 'pm' : 'am';
+
+      horas = horas % 12;
+      horas = horas ? horas : 12; // La hora '0' se convierte en '12'
+      const horasStr = horas < 10 ? '0' + horas : horas;
+
+      return `${horasStr}:${minutos} ${sufijo}`;
+    }
+
     function renderizarTabla() {
       const contenedor = document.querySelector('#tablaExportable .grid');
       contenedor.innerHTML = '';
@@ -198,7 +213,7 @@
           <div class="bg-white p-3.5 rounded-xl shadow border border-slate-200 text-sm space-y-1.5 relative">
             <div class="font-extrabold text-blue-800 text-base leading-tight">${item.lugar}</div>
             ${item.fecha ? `<div class="text-blue-600 font-bold text-xs">📅 ${formatearFecha(item.fecha)}</div>` : ''}
-            <div class="text-slate-700 font-bold text-sm">🕒 ${item.hora}</div>
+            <div class="text-slate-700 font-bold text-sm">🕒 ${formatearHora12h(item.hora)}</div>
             <div class="text-slate-700 font-medium text-sm">👤 ${item.encargado}</div>
             <div class="text-slate-900 font-semibold bg-blue-50 border border-blue-100 p-2 rounded-lg text-xs mt-1.5">📋 ${item.actividad}</div>
             <div class="flex gap-1 pt-2 no-export">
