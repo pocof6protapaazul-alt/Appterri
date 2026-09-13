@@ -217,40 +217,45 @@
         const primerConFecha = puntosDelDia.find(item => item.fecha);
         const fechaEncabezado = primerConFecha ? formatearFecha(primerConFecha.fecha) : '';
 
-        let tarjetasHTML = puntosDelDia.map((item) => `
-          <div class="bg-white p-3 rounded-xl shadow border border-slate-200 text-xs space-y-1.5">
-            <!-- Punto de Encuentro destacado en ancho completo -->
-            <div class="font-black text-blue-900 text-sm md:text-base leading-snug border-b pb-1">
-              📍 ${item.lugar}
-            </div>
+        let tarjetasHTML = puntosDelDia.map((item, index) => {
+          // Fondo claro para la primera actividad (index 0) y fondo más oscuro para la segunda (index 1), etc.
+          const esFondoOscuro = index % 2 !== 0;
+          const bgTarjeta = esFondoOscuro ? 'bg-slate-200 border-slate-300' : 'bg-white border-slate-200';
+          const bgCajaTrabajo = esFondoOscuro ? 'bg-blue-100/80 border-blue-200' : 'bg-blue-50 border-blue-100';
 
-            <!-- Fila con Jornada, Hora y Fecha -->
-            <div class="flex flex-wrap justify-between items-center text-[11px] text-slate-700 gap-1 pt-0.5">
-              <span class="font-bold px-1.5 py-0.5 rounded ${item.jornada === 'Mañana' ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800'}">
-                ${item.jornada || 'Mañana'}
-              </span>
-              <span class="font-bold text-slate-800">🕒 ${formatearHora12h(item.hora)}</span>
-            </div>
+          return `
+            <div class="${bgTarjeta} p-3 rounded-xl shadow border text-xs space-y-1.5 transition-colors">
+              <!-- Punto de Encuentro destacado -->
+              <div class="font-black text-blue-900 text-sm md:text-base leading-snug border-b border-slate-300/60 pb-1">
+                📍 ${item.lugar}
+              </div>
 
-            ${item.fecha ? `<div class="text-blue-600 font-semibold text-[10px]">📅 ${formatearFecha(item.fecha)}</div>` : ''}
+              <!-- Fila con Jornada y Hora -->
+              <div class="flex flex-wrap justify-between items-center text-[11px] text-slate-700 gap-1 pt-0.5">
+                <span class="font-bold px-1.5 py-0.5 rounded ${item.jornada === 'Mañana' ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800'}">
+                  ${item.jornada || 'Mañana'}
+                </span>
+                <span class="font-bold text-slate-800">🕒 ${formatearHora12h(item.hora)}</span>
+              </div>
 
-            <!-- Encargado -->
-            <div class="text-slate-700 font-medium text-xs pt-0.5">
-              👤 <span class="font-semibold text-slate-800">${item.encargado}</span>
-            </div>
+              <!-- Encargado -->
+              <div class="text-slate-700 font-medium text-xs pt-0.5">
+                👤 <span class="font-semibold text-slate-800">${item.encargado}</span>
+              </div>
 
-            <!-- Trabajo / Actividad -->
-            <div class="text-slate-900 font-semibold bg-blue-50 border border-blue-100 p-1.5 rounded-lg text-xs">
-              📋 ${item.actividad}
-            </div>
+              <!-- Trabajo / Actividad -->
+              <div class="text-slate-900 font-semibold ${bgCajaTrabajo} border p-1.5 rounded-lg text-xs">
+                📋 ${item.actividad}
+              </div>
 
-            <!-- Botones de Acción (no se exportan a JPG) -->
-            <div class="flex gap-1 pt-1.5 no-export">
-              <button onclick="prepararEdicion(${item.id})" class="flex-1 bg-slate-100 hover:bg-blue-50 text-blue-600 font-bold py-1 rounded text-[10px]">✏️ Editar</button>
-              <button onclick="eliminarPunto(${item.id})" class="flex-1 bg-slate-100 hover:bg-red-50 text-red-600 font-bold py-1 rounded text-[10px]">🗑️ Borrar</button>
+              <!-- Botones de Acción (no se exportan a JPG) -->
+              <div class="flex gap-1 pt-1.5 no-export">
+                <button onclick="prepararEdicion(${item.id})" class="flex-1 bg-white/80 hover:bg-blue-50 text-blue-600 font-bold py-1 rounded border border-slate-300 text-[10px]">✏️ Editar</button>
+                <button onclick="eliminarPunto(${item.id})" class="flex-1 bg-white/80 hover:bg-red-50 text-red-600 font-bold py-1 rounded border border-slate-300 text-[10px]">🗑️ Borrar</button>
+              </div>
             </div>
-          </div>
-        `).join('');
+          `;
+        }).join('');
 
         if (puntosDelDia.length === 0) {
           tarjetasHTML = `<div class="text-center text-slate-400 py-10 text-xs italic font-medium">Sin registros</div>`;
